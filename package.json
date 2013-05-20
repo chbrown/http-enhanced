@@ -1,0 +1,14 @@
+{
+  "name": "http-enhanced",
+  "version": "0.2.1",
+  "main": "index.js",
+  "description": "Drop-in replacement for Node.js standard `http` API with various helpers.",
+  "keywords": ["http", "enhanced", "maximal", "helpers", "streaming", "nodeps"],
+  "homepage": "http://github.com/chbrown/http-enhanced",
+  "bugs": "http://github.com/chbrown/http-enhanced/issues",
+  "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/chbrown/http-enhanced.git"
+  }
+}
