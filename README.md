@@ -14,7 +14,9 @@ At the command line from the [npm](https://npmjs.org/) registry:
 
     npm install http-enhanced
 
-Or from
+Or from github:
+
+    npm install git://github.com/chbrown/http-enhanced.git
 
 Or in your `package.json`:
 
