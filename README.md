@@ -8,6 +8,21 @@ This is meant to be thinner, just a few helpers for the very simply `req` /
 However, if you don't call any of the methods, nothing changes. You'll just have
 some extra prototype methods lying around that never did anything.
 
+## Install
+
+At the command line from the [npm](https://npmjs.org/) registry:
+
+    npm install http-enhanced
+
+Or from
+
+Or in your `package.json`:
+
+    "dependencies" : {
+      "http-enhanced": "*",
+      ...
+    }
+
 ## Usage
 
 Most often, you'll [create a server](http://nodejs.org/api/http.html#http_event_request)
@@ -43,6 +58,7 @@ A simple change will let you use some shortcuts:
         // 3. and stringify the given object, all in one go:
         res.json({success: true, message: reversed});
       });
+
     }).listen(80);
 
 ## Request
