@@ -8,9 +8,10 @@ http.IncomingMessage.prototype.wait = function(callback) {
   else this.once('end', callback);
 };
 http.IncomingMessage.prototype.saveData = function() {
+  var self = this;
   this.data = '';
   this.on('data', function(chunk) {
-    req.data += chunk;
+    self.data += chunk;
   });
 };
 
