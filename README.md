@@ -116,3 +116,6 @@ Also writes "Redirecting to: /index?error=404" (or whatever url you use).
 
     res.redirect('/index?error=404');
 
+## License
+
+Copyright © 2013 Christopher Brown. [MIT Licensed](LICENSE).
