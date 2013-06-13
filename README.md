@@ -48,12 +48,10 @@ A simple change will let you use some shortcuts:
     var http = require('http-enhanced');
     http.createServer(function (req, res) {
 
-      // save incoming data to req.data
-      req.saveData();
-
-      // wait until the request ends, or call immediately if it already has
-      req.wait(function() {
-        var reversed = req.data.split('').reverse().join('');
+      // save incoming data to req.data and wait until the request ends,
+      //   or callback immediately (setImmediate) if it already has
+      req.readToEnd('utf8', function(err, data) {
+        var reversed = data.split('').reverse().join('');
 
         // 1. set HTTP status code to 200,
         // 2. the Content-Type header to 'application/json',
@@ -65,54 +63,122 @@ A simple change will let you use some shortcuts:
 
 ## Request
 
-**wait**: return immediately (with `setImmediate`, which replaced `process.nextTick`) or after the request has ended, if it has not yet ended. This is useful because the `req.on('end')` event might get triggered if you do some other async stuff before waiting to hear that, in which case you have to check that `req.complete == true`, but this rolls both checks into one function.
+### request.readToEnd([encoding], [callback])
 
-    req.wait(function() {
-      console.log("Always callback, always true! " + req.complete);
+* `encoding` String | null If specified, callback gets a String instead of a Buffer.
+* `callback` Function | null Call some `function(err, data)` when the request ends.
+    * If only one argument is given, it must be the callback.
+
+Read the request into a buffer until the `end` event is triggered, which will
+trigger `callback(Error || null, Buffer || null)`. This uses "new-style"
+streams, listening for `readable` events and calling `read()`, coercing to a
+Buffer when needed.
+
+This function can be called multiple times, with or without the callback.
+
+A popular use case might be if you want to upload a file and do a lot of I/O
+independently but at the same time. You might call `req.readToEnd()` with no
+arguments at the beginning of your request handler, and _then_ set off your
+expensive I/O calls.
+
+You can get back a **string** if you specify the encoding, e.g.,
+`req.readToEnd('utf8', function(err, string) { ... })`. This is exactly
+equivalent to calling:
+
+    req.readToEnd(function(err, buffer) {
+      var string = buffer.toString(encoding);
+      ...
     });
 
-**saveData**: record incoming data `req.on('data')` to a string at `req.data`. This won't work for binary data, since it's just concatenating to a string.
+If the request has already ended, any captured buffer will be immediately
+returned, via `setImmediate` (which replaced `process.nextTick` in node v0.10).
+This might occur if you start listening for `data` at some point, in which
+case the request is flipped to "old-style" streams, and `end` might occur
+before you listen for it.
 
-    req.saveData();
+For that reason, and that calling `req.read()` from multiple listeners could
+produce problems, you should not use either of these:
+
+    req.setEncoding('utf8'); // no!
+    req.on('data', function(chunk) { ... }); // robot, NO!
+
+So you shouldn't call `req.readToEnd()` in your pipeline unless you're going
+to call it again with a callback, later.
 
 ## Response
 
-**writeEnd**: `res.end(data)` is supposed to write the data and then end the
-response. From the docs:
+### response.writeEnd(data)
+
+* `data` String String to write to response
+
+The standard `http` built-in `response.end(data)` is supposed to write the
+data and then end the response. From the docs:
 
 > If data is specified, it is equivalent to calling
 > `request.write(data, encoding)` followed by `request.end()`.
 
-But sometimes it doesn't, so we make that that's what it's really equivalent
-to (minus the optional encoding).
+But sometimes it doesn't, and `writeEnd` makes sure that's what it really does
+(minus the optional encoding).
 
     res.writeEnd('Hello world');
 
-**writeAll**: Roll `writeHead()` and `writeEnd()` all into one:
+### response.writeAll(statusCode, contentType, data)
+
+* `statusCode` Number Three-digit HTTP status code
+* `contentType` String MIME type
+* `data` String String to write to response
+
+Roll `writeHead(statusCode, contentType)` and `writeEnd(data)` all into one:
 
     res.writeAll(200, 'text/xml', '<root>Haha, not really.</root>');
 
-**json**: Set `Content-Type` to `application/json` and encode the object with `JSON.stringify`.
+### response.json(object)
+
+* `object` Object JSON-stringifiable object
+
+Write response to end with `Content-Type: application/json` and HTTP status
+code 200, encoding the object with `JSON.stringify`.
 
     res.json({success: true, message: "Hello world!"});
 
-If `JSON.stringify` throws an error trying to encode your object,
-it will fall back to `util.inspect` with the options: `{showHidden: true, depth: null}`.
+If `JSON.stringify` throws an error trying to encode your object (e.g., if it
+has circular references), it will fall back to `util.inspect` with the options:
+`{showHidden: true, depth: null}`.
 
-**html**: Set status code to 200 and `Content-Type` to `text/html`.
+### response.html(data)
+
+* `data` String HTML to write to response.
+
+Set status code to 200 and `Content-Type` to `text/html`.
 
     res.html('<p><i>Hello</i> world!.</p>');
 
-**text**: Set status code to 200 and `Content-Type` to `text/plain`.
+### response.text(data)
+
+* `data` String Plain text to write to response.
+
+Set status code to 200 and `Content-Type` to `text/plain`.
 
     res.text('Hello world.');
 
-**die**: Set status code to 500 and `Content-Type` to `text/plain`.
+### response.die([statusCode], err)
 
-    res.text('Goodbye, cruel world.');
+* `statusCode` Number Optional three-digit HTTP status code. Defaults to 500.
+* `err` String | Error Will call `err.toString()`.
 
-**redirect**: Set status code to 302 and the `Location` header to the given string.
-Also writes "Redirecting to: /index?error=404" (or whatever url you use).
+Set status code to given status code (or 500) and `Content-Type` to
+`text/plain`.
+
+    res.die('Goodbye, cruel world.');
+
+### response.redirect([statusCode], location)
+
+* `statusCode` Number Optional three-digit HTTP status code. Defaults to 302.
+* `location` String (a URL)
+
+Set status code to given status code (302 by default) and the `Location`
+header to the given string. Also writes the text,
+"Redirecting to: /index?error=404" (or whatever url you use).
 
     res.redirect('/index?error=404');
 
