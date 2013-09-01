@@ -2,11 +2,12 @@
 
 My [wrappers](https://github.com/chbrown/wrappers) library was a bit over the top.
 
-This is meant to be thinner, just a few helpers for the very simply `req` /
+This is meant to be thinner, just a few helpers for the very simple `req` /
 `res` that Node.js's [`http`](http://nodejs.org/api/http.html) API provides.
 
-However, if you don't call any of the methods, nothing changes. You'll just have
+If you don't call any of the methods, nothing changes. You'll just have
 some extra prototype methods lying around that never did anything.
+
 
 ## Install
 
@@ -24,6 +25,7 @@ Or in your `package.json`:
       "http-enhanced": "*",
       ...
     }
+
 
 ## Usage
 
@@ -60,6 +62,7 @@ A simple change will let you use some shortcuts:
       });
 
     }).listen(80);
+
 
 ## Request
 
@@ -181,6 +184,7 @@ header to the given string. Also writes the text,
 "Redirecting to: /index?error=404" (or whatever url you use).
 
     res.redirect('/index?error=404');
+
 
 ## License
 
