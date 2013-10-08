@@ -1,6 +1,6 @@
 {
   "name": "http-enhanced",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "main": "index.js",
   "description": "Drop-in replacement for Node.js standard `http` API with various helpers.",
   "keywords": [
