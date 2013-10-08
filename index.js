@@ -39,12 +39,14 @@ http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
     // start listening for 'readable' events.
     this.on('readable', function() {
       var chunk = self.read();
-      if (!Buffer.isBuffer(chunk)) {
-        // the user should really not be using req.setEncoding('whatever'),
-        //   but we don't want to crash if they do
-        chunk = new Buffer(chunk);
+      if (chunk !== null) {
+        if (!Buffer.isBuffer(chunk)) {
+          // the user should really not be using req.setEncoding('whatever'),
+          //   but we don't want to crash if they do
+          chunk = new Buffer(chunk);
+        }
+        self._readToEnd_buffer = Buffer.concat([self._readToEnd_buffer, chunk]);
       }
-      self._readToEnd_buffer = Buffer.concat([self._readToEnd_buffer, chunk]);
     });
 
     if (callback) {
