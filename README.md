@@ -108,6 +108,19 @@ produce problems, you should not use either of these:
 So you shouldn't call `req.readToEnd()` in your pipeline unless you're going
 to call it again with a callback, later.
 
+### request.readData(callback)
+
+Wraps `req.readToEnd()` and uses the request's `Content-type` header to determine whether to parse the request as JSON or a form querystring.
+
+- **application/json**: Returns result of `JSON.parse`. Interprets empty `application/json` requests as `null`, instead of throwing (`JSON.parse('')` will raise a SyntaxError normally).
+- **application/x-www-form-urlencoded**: Returns result of `querystring.parse`.
+- otherwise, returns the same thing as `readToEnd`, a Buffer.
+
+Does not work for uploads (use something like formidable).
+
+Returns the parsed querystring for GET requests.
+
+
 ## Response
 
 ### response.writeEnd(data)
@@ -188,4 +201,4 @@ header to the given string. Also writes the text,
 
 ## License
 
-Copyright © 2013 Christopher Brown. [MIT Licensed](LICENSE).
+Copyright © 2013–2014 Christopher Brown. [MIT Licensed](LICENSE).

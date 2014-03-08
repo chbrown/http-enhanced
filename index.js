@@ -1,5 +1,7 @@
-'use strict'; /*jslint node: true, indent: 2, es5: true */
+/*jslint node: true */ /*globals setImmediate */
 var http = require('http');
+var querystring = require('querystring');
+var url = require('url');
 var util = require('util');
 
 // Request
@@ -57,6 +59,46 @@ http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
     this.on('end', function() {
       self._readToEnd_state = 'ended';
       if (callback) success();
+    });
+  }
+};
+http.IncomingMessage.prototype.readData = function(callback) {
+  /** Opinionated input/form reader
+
+  callback signature: function(err, Object)
+  */
+  if (this.method == 'GET') {
+    var data = url.parse(this.url, true).query;
+    setImmediate(function() {
+      callback(null, data);
+    });
+  }
+  else {
+    var content_type = this.headers['content-type'] || '';
+    this.readToEnd(function(err, body) {
+      if (err) return callback(err);
+
+      if (content_type.match(/application\/json/)) {
+        // empty body translates to null
+        if (body.length === 0) {
+          callback(null, null);
+        }
+        else {
+          try {
+            callback(null, JSON.parse(body));
+          }
+          catch (exc) {
+            callback(exc);
+          }
+        }
+      }
+      else if (content_type.match(/application\/x-www-form-urlencoded/)) {
+        // will querystring.parse ever throw?
+        callback(null, querystring.parse(body.toString()));
+      }
+      else {
+        callback(null, body);
+      }
     });
   }
 };
