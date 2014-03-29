@@ -114,6 +114,11 @@ http.ServerResponse.prototype.writeAll = function(http_status_code, content_type
   this.end();
 };
 http.ServerResponse.prototype.json = function(http_status_code, obj) {
+  if (obj === undefined) {
+    obj = http_status_code;
+    http_status_code = 200;
+  }
+
   var json;
   try {
     json = JSON.stringify(obj);
@@ -121,21 +126,22 @@ http.ServerResponse.prototype.json = function(http_status_code, obj) {
   catch (exc) {
     json = util.inspect(obj, {showHidden: true, depth: null});
   }
-  this.writeAll(200, 'application/json', json);
+
+  this.writeAll(http_status_code, 'application/json', json);
 };
 http.ServerResponse.prototype.html = function(http_status_code, str) {
   if (str === undefined) {
     str = http_status_code;
     http_status_code = 200;
   }
-  this.writeAll(200, 'text/html', str);
+  this.writeAll(http_status_code, 'text/html', str);
 };
 http.ServerResponse.prototype.text = function(http_status_code, str) {
   if (str === undefined) {
     str = http_status_code;
     http_status_code = 200;
   }
-  this.writeAll(200, 'text/plain', str);
+  this.writeAll(http_status_code, 'text/plain', str);
 };
 http.ServerResponse.prototype.empty = function(http_status_code) {
   // response.writeHead(statusCode, [reasonPhrase], [headers])
