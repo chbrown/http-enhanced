@@ -108,11 +108,12 @@ http.ServerResponse.prototype.writeEnd = function(s) {
   this.write(s);
   this.end();
 };
-http.ServerResponse.prototype.writeAll = function(http_code, content_type, body) {
-  this.writeHead(http_code, {'Content-Type': content_type});
-  this.writeEnd(body);
+http.ServerResponse.prototype.writeAll = function(http_status_code, content_type, body) {
+  this.writeHead(http_status_code, {'Content-Type': content_type});
+  this.write(body);
+  this.end();
 };
-http.ServerResponse.prototype.json = function(obj) {
+http.ServerResponse.prototype.json = function(http_status_code, obj) {
   var json;
   try {
     json = JSON.stringify(obj);
@@ -122,29 +123,46 @@ http.ServerResponse.prototype.json = function(obj) {
   }
   this.writeAll(200, 'application/json', json);
 };
-http.ServerResponse.prototype.html = function(str) {
+http.ServerResponse.prototype.html = function(http_status_code, str) {
+  if (str === undefined) {
+    str = http_status_code;
+    http_status_code = 200;
+  }
   this.writeAll(200, 'text/html', str);
 };
-http.ServerResponse.prototype.text = function(str) {
+http.ServerResponse.prototype.text = function(http_status_code, str) {
+  if (str === undefined) {
+    str = http_status_code;
+    http_status_code = 200;
+  }
   this.writeAll(200, 'text/plain', str);
 };
-http.ServerResponse.prototype.die = function(http_code, err) {
+http.ServerResponse.prototype.empty = function(http_status_code) {
+  // response.writeHead(statusCode, [reasonPhrase], [headers])
+  if (http_status_code === undefined) {
+    http_status_code = 200;
+  }
+  this.writeHead(http_status_code);
+  this.end();
+};
+http.ServerResponse.prototype.die = function(http_status_code, err) {
   // if only one argument is specified, it must be the error string
   if (err === undefined) {
-    err = http_code;
-    http_code = 500;
+    err = http_status_code;
+    http_status_code = 500;
   }
-  var str = err ? 'Failure: ' + err.toString() : 'Failure';
-  this.writeAll(http_code, 'text/plain', str);
+  var body = err ? 'Failure: ' + err.toString() : 'Failure';
+  this.writeAll(http_status_code, 'text/plain', body);
 };
-http.ServerResponse.prototype.redirect = function(http_code, location) {
+http.ServerResponse.prototype.redirect = function(http_status_code, location) {
   // if only one argument is specified, it must be the location
   if (location === undefined) {
-    location = http_code;
-    http_code = 302;
+    location = http_status_code;
+    http_status_code = 302;
   }
-  this.writeHead(http_code, {'Location': location});
-  this.writeEnd('Redirecting to: ' + location);
+  this.writeHead(http_status_code, {'Location': location});
+  this.write('Redirecting to: ' + location);
+  this.end();
 };
 
 module.exports = http;
