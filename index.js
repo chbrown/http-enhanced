@@ -86,7 +86,7 @@ http.IncomingMessage.prototype.readData = function(callback) {
     this.readToEnd(function(err, body) {
       if (err) return callback(err);
 
-      if (content_type.match(/application\/json/)) {
+      if (content_type.match(/application\/json/i)) {
         // empty body translates to null
         if (body.length === 0) {
           callback(null, null);
@@ -100,7 +100,7 @@ http.IncomingMessage.prototype.readData = function(callback) {
           }
         }
       }
-      else if (content_type.match(/application\/x-www-form-urlencoded/)) {
+      else if (content_type.match(/application\/x-www-form-urlencoded/i)) {
         // will querystring.parse ever throw?
         callback(null, querystring.parse(body.toString()));
       }

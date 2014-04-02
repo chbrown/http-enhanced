@@ -18,5 +18,9 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/chbrown/http-enhanced.git"
+  },
+  "devDependencies": {
+    "tap": "*",
+    "request": "*"
   }
 }
