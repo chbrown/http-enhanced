@@ -2,7 +2,15 @@
 var http = require('http');
 var querystring = require('querystring');
 var url = require('url');
-var util = require('util');
+
+function _serialize(object) {
+  try {
+    return JSON.stringify(object);
+  }
+  catch (exc) {
+    return JSON.stringify('JSON serialization error: ' + exc.toString());
+  }
+}
 
 // Request
 http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
@@ -104,71 +112,54 @@ http.IncomingMessage.prototype.readData = function(callback) {
 };
 
 // Response
-http.ServerResponse.prototype.writeEnd = function(s) {
-  this.write(s);
-  this.end();
+http.ServerResponse.prototype.status = function(http_status_code) {
+  this.statusCode = http_status_code;
+  return this;
 };
-http.ServerResponse.prototype.writeAll = function(http_status_code, content_type, body) {
-  this.writeHead(http_status_code, {'Content-Type': content_type});
-  this.write(body);
-  this.end();
+http.ServerResponse.prototype.ngjson = function(object) {
+  // angular.js style protection
+  this.setHeader('Content-Type', 'application/json');
+  this.end(")]}',\n" + _serialize(object));
+  return this;
 };
-http.ServerResponse.prototype.json = function(http_status_code, obj) {
-  if (obj === undefined) {
-    obj = http_status_code;
-    http_status_code = 200;
-  }
-
-  var json;
-  try {
-    json = JSON.stringify(obj);
-  }
-  catch (exc) {
-    json = util.inspect(obj, {showHidden: true, depth: null});
-  }
-
-  this.writeAll(http_status_code, 'application/json', json);
+http.ServerResponse.prototype.xjson = function(object) {
+  // this is how facebook does it, which is similar to how google does it (with 'while(1);')
+  // I've also seen 'throw 1;' and '%%%BREAK%%%'
+  this.setHeader('Content-Type', 'application/x-javascript');
+  this.end('for (;;);' + _serialize(object));
+  return this;
 };
-http.ServerResponse.prototype.html = function(http_status_code, str) {
-  if (str === undefined) {
-    str = http_status_code;
-    http_status_code = 200;
-  }
-  this.writeAll(http_status_code, 'text/html', str);
+http.ServerResponse.prototype.json = function(object) {
+  this.setHeader('Content-Type', 'application/json');
+  this.end(_serialize(object));
+  return this;
 };
-http.ServerResponse.prototype.text = function(http_status_code, str) {
-  if (str === undefined) {
-    str = http_status_code;
-    http_status_code = 200;
-  }
-  this.writeAll(http_status_code, 'text/plain', str);
+http.ServerResponse.prototype.html = function(body) {
+  this.setHeader('Content-Type', 'text/html');
+  this.end(body);
+  return this;
 };
-http.ServerResponse.prototype.empty = function(http_status_code) {
-  // response.writeHead(statusCode, [reasonPhrase], [headers])
-  if (http_status_code === undefined) {
-    http_status_code = 200;
-  }
-  this.writeHead(http_status_code);
-  this.end();
+http.ServerResponse.prototype.text = function(body) {
+  this.setHeader('Content-Type', 'text/plain');
+  this.end(body);
+  return this;
 };
-http.ServerResponse.prototype.die = function(http_status_code, err) {
-  // if only one argument is specified, it must be the error string
-  if (err === undefined) {
-    err = http_status_code;
-    http_status_code = 500;
+http.ServerResponse.prototype.die = function(error) {
+  if (this.statusCode == 200) {
+    // only reset an OK
+    this.statusCode = 500;
   }
-  var body = err ? 'Failure: ' + err.toString() : 'Failure';
-  this.writeAll(http_status_code, 'text/plain', body);
+  return this.text(error ? 'Failure: ' + error.toString() : 'Failure');
 };
-http.ServerResponse.prototype.redirect = function(http_status_code, location) {
-  // if only one argument is specified, it must be the location
-  if (location === undefined) {
-    location = http_status_code;
-    http_status_code = 302;
+http.ServerResponse.prototype.redirect = function(location) {
+  if (this.statusCode == 200) {
+    // only set the statusCode if it's the default
+    // so, you would write res.status(307).redirect(url) if you want something besides 302
+    this.statusCode = 302;
   }
-  this.writeHead(http_status_code, {'Location': location});
-  this.write('Redirecting to: ' + location);
-  this.end();
+  this.setHeader('Location', location);
+  this.end('Redirecting to: ' + location);
+  return this;
 };
 
 module.exports = http;
