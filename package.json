@@ -22,5 +22,8 @@
   "devDependencies": {
     "tap": "*",
     "request": "*"
+  },
+  "scripts": {
+    "test": "tap test"
   }
 }
