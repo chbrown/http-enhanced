@@ -179,13 +179,15 @@ Set status code to 200 and `Content-Type` to `text/plain`.
 
     res.text('Hello world.');
 
-### response.die(err)
+### response.die([error])
 
-* `statusCode` Number Optional three-digit HTTP status code. Defaults to 500.
-* `err` String | Error Will call `err.toString()`.
+* `error` String | Error Will call `error.toString()`.
 
-Set status code to given status code (or 500) and `Content-Type` to
-`text/plain`.
+Set status code to 500 (if it's currently 200) and `Content-Type` to
+`text/plain`, using the string representation of the given error, prepended
+with the label "Failure: ", as the response body (or just "Failure" if no
+error is provided). If you want to use a 4xx or 5xx status code other than
+500, call, e.g., `.status(418)` before calling `.die()`.
 
     res.die('Goodbye, cruel world.');
 

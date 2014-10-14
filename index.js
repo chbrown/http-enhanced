@@ -150,7 +150,8 @@ http.ServerResponse.prototype.die = function(error) {
     // only reset an OK
     this.statusCode = 500;
   }
-  return this.text(error ? 'Failure: ' + error.toString() : 'Failure');
+  var message = error ? 'Failure: ' + error.toString() : 'Failure';
+  return this.text(message);
 };
 http.ServerResponse.prototype.redirect = function(location) {
   if (this.statusCode == 200) {
