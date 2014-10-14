@@ -102,7 +102,8 @@ http.IncomingMessage.prototype.readData = function(callback) {
       }
       else if (content_type.match(/application\/x-www-form-urlencoded/i)) {
         // will querystring.parse ever throw?
-        callback(null, querystring.parse(body.toString()));
+        var body_string = body.toString(); // assumes utf-8
+        callback(null, querystring.parse(body_string));
       }
       else {
         callback(null, body);

@@ -105,18 +105,20 @@ produce problems, you should not use either of these:
     req.setEncoding('utf8'); // no!
     req.on('data', function(chunk) { ... }); // robot, NO!
 
-So you shouldn't call `req.readToEnd()` in your pipeline unless you're going
-to call it again with a callback, later.
+So you shouldn't call `req.readToEnd()` (without a callback) in your pipeline
+unless you're going to call it again with a callback, later.
 
 ### request.readData(callback)
 
-Wraps `req.readToEnd()` and uses the request's `Content-type` header to determine whether to parse the request as JSON or a form querystring.
+Wraps `req.readToEnd()` and uses the request's `Content-Type` header to determine whether to parse the request as JSON or a form querystring.
 
-- **application/json**: Returns result of `JSON.parse`. Interprets empty `application/json` requests as `null`, instead of throwing (`JSON.parse('')` will raise a SyntaxError normally).
-- **application/x-www-form-urlencoded**: Returns result of `querystring.parse`.
+    callback = function(error, data) { ... }
+
+- `application/json`: Returns result of `JSON.parse`. Interprets empty `application/json` requests as `null`, instead of throwing an Error, since `JSON.parse('')` will raise a SyntaxError normally. If `JSON.parse(body)` throws an error due to invalid JSON, calls back with the error.
+- `application/x-www-form-urlencoded`: Returns result of `querystring.parse`.
 - otherwise, returns the same thing as `readToEnd`, a Buffer.
 
-Does not work for uploads (use something like formidable).
+Does not work for uploads (use something like [formidable](https://github.com/felixge/node-formidable)).
 
 Returns the parsed querystring for GET requests.
 
@@ -177,7 +179,7 @@ Set status code to 200 and `Content-Type` to `text/plain`.
 
     res.text('Hello world.');
 
-### response.die([statusCode], err)
+### response.die(err)
 
 * `statusCode` Number Optional three-digit HTTP status code. Defaults to 500.
 * `err` String | Error Will call `err.toString()`.
@@ -187,9 +189,8 @@ Set status code to given status code (or 500) and `Content-Type` to
 
     res.die('Goodbye, cruel world.');
 
-### response.redirect([statusCode], location)
+### response.redirect(location)
 
-* `statusCode` Number Optional three-digit HTTP status code. Defaults to 302.
 * `location` String (a URL)
 
 Set status code to given status code (302 by default) and the `Location`
@@ -198,6 +199,9 @@ header to the given string. Also writes the text,
 
     res.redirect('/index?error=404');
 
+To use a different 3xx status code, set it before calling redirect.
+
+    res.status(303).redirect('/login');
 
 ## License
 
