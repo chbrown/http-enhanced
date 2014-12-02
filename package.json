@@ -20,8 +20,8 @@
     "url": "git://github.com/chbrown/http-enhanced.git"
   },
   "devDependencies": {
-    "tap": "*",
-    "request": "*"
+    "request": "*",
+    "tap": "*"
   },
   "scripts": {
     "test": "tap test"
