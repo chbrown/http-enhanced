@@ -145,14 +145,6 @@ http.ServerResponse.prototype.text = function(body) {
   this.end(body);
   return this;
 };
-http.ServerResponse.prototype.die = function(error) {
-  if (this.statusCode == 200) {
-    // only reset an OK
-    this.statusCode = 500;
-  }
-  var message = error ? 'Failure: ' + error.toString() : 'Failure';
-  return this.text(message);
-};
 http.ServerResponse.prototype.redirect = function(location) {
   if (this.statusCode == 200) {
     // only set the statusCode if it's the default
@@ -162,6 +154,59 @@ http.ServerResponse.prototype.redirect = function(location) {
   this.setHeader('Location', location);
   this.end('Redirecting to: ' + location);
   return this;
+};
+http.ServerResponse.prototype.die = function(error) {
+  if (this.statusCode == 200) {
+    // only reset an OK
+    this.statusCode = 500;
+  }
+  var message = error ? 'Failure: ' + error.toString() : 'Failure';
+  return this.text(message);
+};
+http.ServerResponse.prototype.error = function(error, request_headers) {
+  /** Respond to the client with an error.
+
+  If error.statusCode is set, it will be used as the HTTP status code
+  delivered in the response.
+
+      error: Error (required)
+  */
+  if (error.statusCode) {
+    // if the error specifies the desired HTTP status code, use that.
+    this.statusCode = error.statusCode;
+  }
+  else if (this.statusCode == 200) {
+    // if the error is not HTTP-aware, and the statusCode hasn't already been
+    // set to something besides 200 OK, set it to the default error status of 400.
+    this.statusCode = 400;
+  }
+  return this.adapt(error, request_headers);
+};
+http.ServerResponse.prototype.adapt = function(result, request_headers) {
+  /** Using the Accept header from the accompanying request, serve an
+  appropriate response to the client.
+
+  * result should be a toString'able / JSON.stringify'able object.
+  * result must not be null or undefined.
+  * request_headers is optional, but if adapt is called directly, it would be
+    weird not to specify it. The optionality and defaults are intended
+    for when adapt() is called from other response helpers, like .error(...).
+
+  TODO: adapt to Accept-Encoding and Accept-Language headers
+  TODO: respect ordering of types in accept header (which indicates the
+        client's preferences)
+  */
+  // accept is (should be) a comma-separated list of mime types
+  var accept = 'text/plain';
+  if (request_headers && request_headers.accept !== undefined) {
+    accept = request_headers.accept;
+  }
+  // prefer JSON, if the client accepts it (see TODO in docstring)
+  if (accept.indexOf('application/json') > -1) {
+    return this.json(result);
+  }
+  // TODO: support other mime types
+  return this.text(result.toString());
 };
 
 module.exports = http;
