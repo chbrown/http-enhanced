@@ -7,22 +7,22 @@ function _serialize(object) {
   try {
     return JSON.stringify(object);
   }
-  catch (exc) {
-    return JSON.stringify('JSON serialization error: ' + exc.toString());
+  catch (error) {
+    return JSON.stringify(ErrorResult.fromError(error));
   }
 }
 
-var ErrorResult = function(name, message) {
+var ErrorResult = function(message, name) {
   /** Error objects do not stringify well. This wrapper tries to look mostly
   like an error, but responds to toString() and toJSON() better.
 
-  Every Error has a .name and a .message. Anything else is optional.
+  Every Error has a .message. Most Errors have a .name. Anything else is optional.
   */
-  this.name = name;
   this.message = message;
+  this.name = name || 'Error';
 };
 ErrorResult.fromError = function(error) {
-  var error_result = new ErrorResult(error.name, error.message);
+  var error_result = new ErrorResult(error.message, error.name);
   for (var key in error) {
     if (error.hasOwnProperty(key)) {
       error_result[key] = error[key];
