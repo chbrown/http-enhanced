@@ -12,6 +12,28 @@ function _serialize(object) {
   }
 }
 
+var ErrorResult = function(name, message) {
+  /** Error objects do not stringify well. This wrapper tries to look mostly
+  like an error, but responds to toString() and toJSON() better.
+
+  Every Error has a .name and a .message. Anything else is optional.
+  */
+  this.name = name;
+  this.message = message;
+};
+ErrorResult.fromError = function(error) {
+  var error_result = new ErrorResult(error.name, error.message);
+  for (var key in error) {
+    if (error.hasOwnProperty(key)) {
+      error_result[key] = error[key];
+    }
+  }
+  return error_result;
+};
+ErrorResult.prototype.toString = function() {
+  return this.name + ': ' + this.message;
+};
+
 // Request
 http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
   // req.readToEnd([encoding], callback);
@@ -120,6 +142,7 @@ http.ServerResponse.prototype.status = function(http_status_code) {
 http.ServerResponse.prototype.ngjson = function(object) {
   // angular.js style protection
   this.setHeader('Content-Type', 'application/json');
+  // angular.js will trim it either with or without the comma.
   this.end(")]}',\n" + _serialize(object));
   return this;
 };
@@ -180,7 +203,7 @@ http.ServerResponse.prototype.error = function(error, request_headers) {
     // set to something besides 200 OK, set it to the default error status of 400.
     this.statusCode = 400;
   }
-  return this.adapt(error, request_headers);
+  return this.adapt(ErrorResult.fromError(error), request_headers);
 };
 http.ServerResponse.prototype.adapt = function(result, request_headers) {
   /** Using the Accept header from the accompanying request, serve an
@@ -195,17 +218,18 @@ http.ServerResponse.prototype.adapt = function(result, request_headers) {
   TODO: adapt to Accept-Encoding and Accept-Language headers
   TODO: respect ordering of types in accept header (which indicates the
         client's preferences)
+  TODO: support other mime types
   */
   // accept is (should be) a comma-separated list of mime types
   var accept = 'text/plain';
   if (request_headers && request_headers.accept !== undefined) {
     accept = request_headers.accept;
   }
+
   // prefer JSON, if the client accepts it (see TODO in docstring)
   if (accept.indexOf('application/json') > -1) {
     return this.json(result);
   }
-  // TODO: support other mime types
   return this.text(result.toString());
 };
 
