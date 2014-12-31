@@ -207,4 +207,4 @@ To use a different 3xx status code, set it before calling redirect.
 
 ## License
 
-Copyright © 2013–2014 Christopher Brown. [MIT Licensed](LICENSE).
+Copyright 2013-2014 Christopher Brown. [MIT Licensed](http://opensource.org/licenses/MIT).
