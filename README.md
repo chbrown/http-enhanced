@@ -1,30 +1,18 @@
 # http-enhanced
 
-My [wrappers](https://github.com/chbrown/wrappers) library was a bit over the top.
+A drop-in replacement (add-on, really) for Node.js standard library's
+[`http`](http://nodejs.org/api/http.html) module.
 
-This is meant to be thinner, just a few helpers for the very simple `req` /
-`res` that Node.js's [`http`](http://nodejs.org/api/http.html) API provides.
-
-If you don't call any of the methods, nothing changes. You'll just have
-some extra prototype methods lying around that never did anything.
+It adds a few methods to the `http.ServerResponse` and `http.IncomingMessage`
+prototypes. If you don't call any of the methods, nothing changes. You'll just
+have some extra methods lying around that never did anything.
 
 
 ## Install
 
-At the command line from the [npm](https://npmjs.org/) registry:
+From the [npmjs](https://npmjs.org/) registry:
 
-    npm install http-enhanced
-
-Or from github:
-
-    npm install git://github.com/chbrown/http-enhanced.git
-
-Or in your `package.json`:
-
-    "dependencies" : {
-      "http-enhanced": "*",
-      ...
-    }
+    npm install --save http-enhanced
 
 
 ## Usage
@@ -56,7 +44,7 @@ A simple change will let you use some shortcuts:
         var reversed = data.split('').reverse().join('');
 
         // 1. set HTTP status code to 200,
-        // 2. the Content-Type header to 'application/json',
+        // 2. set the Content-Type header to 'application/json',
         // 3. and stringify the given object, all in one go:
         res.json({success: true, message: reversed});
       });
