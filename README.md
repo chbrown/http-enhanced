@@ -20,36 +20,36 @@ From the [npmjs](https://npmjs.org/) registry:
 Most often, you'll [create a server](http://nodejs.org/api/http.html#http_event_request)
 like this:
 
-    var http = require('http');
+    var http = require('http')
     http.createServer(function (req, res) {
 
       // req (request) is an instance of http.IncomingMessage
-      var url = req.url;
+      var url = req.url
 
       // res (response) is an instance of http.ServerResponse
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.write('Hello, world!');
-      res.end();
+      res.writeHead(200, {'Content-Type': 'text/html'})
+      res.write('Hello, world!')
+      res.end()
 
-    }).listen(80);
+    }).listen(80)
 
 A simple change will let you use some shortcuts:
 
-    var http = require('http-enhanced');
+    var http = require('http-enhanced')
     http.createServer(function (req, res) {
 
       // save incoming data to req.data and wait until the request ends,
       //   or callback immediately (setImmediate) if it already has
       req.readToEnd('utf8', function(err, data) {
-        var reversed = data.split('').reverse().join('');
+        var reversed = data.split('').reverse().join('')
 
         // 1. set HTTP status code to 200,
         // 2. set the Content-Type header to 'application/json',
         // 3. and stringify the given object, all in one go:
-        res.json({success: true, message: reversed});
-      });
+        res.json({success: true, message: reversed})
+      })
 
-    }).listen(80);
+    }).listen(80)
 
 
 ## Request
@@ -77,9 +77,9 @@ You can get back a **string** if you specify the encoding, e.g.,
 equivalent to calling:
 
     req.readToEnd(function(err, buffer) {
-      var string = buffer.toString(encoding);
+      var string = buffer.toString(encoding)
       ...
-    });
+    })
 
 If the request has already ended, any captured buffer will be immediately
 returned, via `setImmediate` (which replaced `process.nextTick` in node v0.10).
@@ -90,8 +90,8 @@ before you listen for it.
 For that reason, and that calling `req.read()` from multiple listeners could
 produce problems, you should not use either of these:
 
-    req.setEncoding('utf8'); // no!
-    req.on('data', function(chunk) { ... }); // robot, NO!
+    req.setEncoding('utf8') // no!
+    req.on('data', function(chunk) { ... }) // robot, NO!
 
 So you shouldn't call `req.readToEnd()` (without a callback) in your pipeline
 unless you're going to call it again with a callback, later.
@@ -126,7 +126,7 @@ data and then end the response. From the docs:
 But sometimes it doesn't, and `writeEnd` makes sure that's what it really does
 (minus the optional encoding).
 
-    res.writeEnd('Hello world');
+    res.writeEnd('Hello world')
 
 ### response.writeAll(statusCode, contentType, data)
 
@@ -136,7 +136,7 @@ But sometimes it doesn't, and `writeEnd` makes sure that's what it really does
 
 Roll `writeHead(statusCode, contentType)` and `writeEnd(data)` all into one:
 
-    res.writeAll(200, 'text/xml', '<root>Haha, not really.</root>');
+    res.writeAll(200, 'text/xml', '<root>Haha, not really.</root>')
 
 ### response.json(object)
 
@@ -145,7 +145,7 @@ Roll `writeHead(statusCode, contentType)` and `writeEnd(data)` all into one:
 Write response to end with `Content-Type: application/json` and HTTP status
 code 200, encoding the object with `JSON.stringify`.
 
-    res.json({success: true, message: "Hello world!"});
+    res.json({success: true, message: "Hello world!"})
 
 If `JSON.stringify` throws an error trying to encode your object (e.g., if it
 has circular references), it will fall back to `util.inspect` with the options:
@@ -157,7 +157,7 @@ has circular references), it will fall back to `util.inspect` with the options:
 
 Set status code to 200 and `Content-Type` to `text/html`.
 
-    res.html('<p><i>Hello</i> world!.</p>');
+    res.html('<p><i>Hello</i> world!.</p>')
 
 ### response.text(data)
 
@@ -165,7 +165,7 @@ Set status code to 200 and `Content-Type` to `text/html`.
 
 Set status code to 200 and `Content-Type` to `text/plain`.
 
-    res.text('Hello world.');
+    res.text('Hello world.')
 
 ### response.die([error])
 
@@ -177,7 +177,7 @@ with the label "Failure: ", as the response body (or just "Failure" if no
 error is provided). If you want to use a 4xx or 5xx status code other than
 500, call, e.g., `.status(418)` before calling `.die()`.
 
-    res.die('Goodbye, cruel world.');
+    res.die('Goodbye, cruel world.')
 
 ### response.redirect(location)
 
@@ -187,11 +187,11 @@ Set status code to given status code (302 by default) and the `Location`
 header to the given string. Also writes the text,
 "Redirecting to: /index?error=404" (or whatever url you use).
 
-    res.redirect('/index?error=404');
+    res.redirect('/index?error=404')
 
 To use a different 3xx status code, set it before calling redirect.
 
-    res.status(303).redirect('/login');
+    res.status(303).redirect('/login')
 
 ## License
 
