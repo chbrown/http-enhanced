@@ -1,4 +1,3 @@
-/*jslint node: true */ /*globals setImmediate */
 var http = require('http');
 var querystring = require('querystring');
 var url = require('url');

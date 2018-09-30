@@ -1,4 +1,3 @@
-/*jslint node: true */
 var tap = require('tap');
 var request = require('request');
 
