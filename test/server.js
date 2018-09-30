@@ -89,7 +89,7 @@ tap.test('basic server', (t) => {
 
     request.get(addrport + '/null-and-void', (err, res, body) => {
       t.equal(res.statusCode, 500)
-      t.equal(body, 'Failure: Not found, dammit!')
+      t.equal(body, 'Not found, dammit!')
     })
 
     request.get(addrport + '/relocator', {followRedirect: false}, (err, res, body) => {
