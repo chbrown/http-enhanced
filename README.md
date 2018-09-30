@@ -1,5 +1,8 @@
 # http-enhanced
 
+[![latest version published to npm](https://badge.fury.io/js/http-enhanced.svg)](https://www.npmjs.com/package/http-enhanced)
+[![Travis CI build status](https://travis-ci.org/chbrown/http-enhanced.svg?branch=master)](https://travis-ci.org/chbrown/http-enhanced)
+
 A drop-in replacement (add-on, really) for Node.js standard library's
 [`http`](http://nodejs.org/api/http.html) module.
 
