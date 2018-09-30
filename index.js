@@ -1,6 +1,6 @@
-var http = require('http')
-var querystring = require('querystring')
-var url = require('url')
+const http = require('http')
+const querystring = require('querystring')
+const url = require('url')
 
 function _serialize(object) {
   try {
@@ -21,8 +21,8 @@ var ErrorResult = function(message, name) {
   this.name = name || 'Error'
 }
 ErrorResult.fromError = function(error) {
-  var error_result = new ErrorResult(error.message, error.name)
-  for (var key in error) {
+  const error_result = new ErrorResult(error.message, error.name)
+  for (const key in error) {
     if (error.hasOwnProperty(key)) {
       error_result[key] = error[key]
     }
@@ -47,11 +47,11 @@ http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
   // encoding may still be undefined, in which case
   // we will just return a buffer, if callback is specifed
 
-  var self = this
+  const self = this
 
   // is this closure unnecessarily messy?
-  var success = function() {
-    var buffer = self._readToEnd_buffer
+  const success = function() {
+    const buffer = self._readToEnd_buffer
     callback(null, encoding ? buffer.toString(encoding) : buffer)
   }
 
@@ -68,8 +68,8 @@ http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
     this._readToEnd_buffer = new Buffer(0)
 
     // start listening for 'readable' events.
-    this.on('readable', function() {
-      var chunk = self.read()
+    this.on('readable', () => {
+      let chunk = self.read()
       if (chunk !== null) {
         if (!Buffer.isBuffer(chunk)) {
           // the user should really not be using req.setEncoding('whatever'),
@@ -85,7 +85,7 @@ http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
     }
 
     // can 'error' and 'end' both be called? that might be bad.
-    this.on('end', function() {
+    this.on('end', () => {
       self._readToEnd_state = 'ended'
       if (callback) success()
     })
@@ -97,14 +97,14 @@ http.IncomingMessage.prototype.readData = function(callback) {
   callback signature: function(err, Object)
   */
   if (this.method == 'GET') {
-    var data = url.parse(this.url, true).query
-    setImmediate(function() {
+    const data = url.parse(this.url, true).query
+    setImmediate(() => {
       callback(null, data)
     })
   }
   else {
-    var content_type = this.headers['content-type'] || ''
-    this.readToEnd(function(err, body) {
+    const content_type = this.headers['content-type'] || ''
+    this.readToEnd((err, body) => {
       if (err) return callback(err)
 
       if (content_type.match(/application\/json/i)) {
@@ -123,7 +123,7 @@ http.IncomingMessage.prototype.readData = function(callback) {
       }
       else if (content_type.match(/application\/x-www-form-urlencoded/i)) {
         // will querystring.parse ever throw?
-        var body_string = body.toString() // assumes utf-8
+        const body_string = body.toString() // assumes utf-8
         callback(null, querystring.parse(body_string))
       }
       else {
@@ -182,7 +182,7 @@ http.ServerResponse.prototype.die = function(error) {
     // only reset an OK
     this.statusCode = 500
   }
-  var message = error ? 'Failure: ' + error.toString() : 'Failure'
+  const message = error ? 'Failure: ' + error.toString() : 'Failure'
   return this.text(message)
 }
 http.ServerResponse.prototype.error = function(error, request_headers) {
@@ -220,7 +220,7 @@ http.ServerResponse.prototype.adapt = function(result, request_headers) {
   TODO: support other mime types
   */
   // accept is (should be) a comma-separated list of mime types
-  var accept = 'text/plain'
+  let accept = 'text/plain'
   if (request_headers && request_headers.accept !== undefined) {
     accept = request_headers.accept
   }
