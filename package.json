@@ -1,7 +1,6 @@
 {
   "name": "http-enhanced",
   "version": "0.5.3",
-  "main": "index.js",
   "description": "Drop-in replacement for Node.js standard `http` API with various helpers.",
   "keywords": [
     "http",
@@ -12,13 +11,9 @@
     "nodeps"
   ],
   "homepage": "http://github.com/chbrown/http-enhanced",
-  "bugs": "http://github.com/chbrown/http-enhanced/issues",
-  "author": "Christopher Brown <io@henrian.com> (http://henrian.com)",
+  "author": "Christopher Brown <io@henrian.com>",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/chbrown/http-enhanced.git"
-  },
+  "repository": "github:chbrown/http-enhanced",
   "devDependencies": {
     "request": "*",
     "tap": "*"
