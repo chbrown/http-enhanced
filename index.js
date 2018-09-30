@@ -2,26 +2,29 @@ const http = require('http')
 const querystring = require('querystring')
 const url = require('url')
 
-const ErrorResult = function(message, name) {
-  /** Error objects do not stringify well. This wrapper tries to look mostly
-  like an error, but responds to toString() and toJSON() better.
+/**
+Error objects do not stringify well. This wrapper tries to look mostly like an
+error, but responds to toString() and toJSON() better.
 
-  Every Error has a .message. Most Errors have a .name. Anything else is optional.
-  */
-  this.message = message
-  this.name = name || 'Error'
-}
-ErrorResult.fromError = function(error) {
-  const error_result = new ErrorResult(error.message, error.name)
-  for (const key in error) {
-    if (Object.prototype.hasOwnProperty.call(error, key)) {
-      error_result[key] = error[key]
-    }
+Every Error has `message` and `name` properties. Everything else is optional.
+*/
+class ErrorResult extends Error {
+  constructor(message, name) {
+    super(message)
+    this.name = name || 'Error'
   }
-  return error_result
-}
-ErrorResult.prototype.toString = function() {
-  return this.name + ': ' + this.message
+  toString() {
+    return this.name + ': ' + this.message
+  }
+  static fromError(error) {
+    const error_result = new ErrorResult(error.message, error.name)
+    for (const key in error) {
+      if (Object.prototype.hasOwnProperty.call(error, key)) {
+        error_result[key] = error[key]
+      }
+    }
+    return error_result
+  }
 }
 
 function _serialize(object) {
@@ -182,7 +185,7 @@ http.ServerResponse.prototype.die = function(error) {
     // only reset an OK
     this.statusCode = 500
   }
-  const message = error ? 'Failure: ' + error.toString() : 'Failure'
+  const message = error ? error.toString() : 'Failure'
   return this.text(message)
 }
 http.ServerResponse.prototype.error = function(error, request_headers) {
