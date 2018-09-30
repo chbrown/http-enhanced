@@ -1,6 +1,12 @@
 const tap = require('tap')
 const request = require('request')
 
+tap.test('require should substantiate', (t) => {
+  const http = require('../')
+  t.ok(http, 'http should load from index.js in parent directory')
+  t.end()
+})
+
 const http = require('..')
 
 const handler = function(req, res) {
