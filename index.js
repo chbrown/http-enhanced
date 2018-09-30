@@ -2,16 +2,7 @@ const http = require('http')
 const querystring = require('querystring')
 const url = require('url')
 
-function _serialize(object) {
-  try {
-    return JSON.stringify(object)
-  }
-  catch (error) {
-    return JSON.stringify(ErrorResult.fromError(error))
-  }
-}
-
-var ErrorResult = function(message, name) {
+const ErrorResult = function(message, name) {
   /** Error objects do not stringify well. This wrapper tries to look mostly
   like an error, but responds to toString() and toJSON() better.
 
@@ -23,7 +14,7 @@ var ErrorResult = function(message, name) {
 ErrorResult.fromError = function(error) {
   const error_result = new ErrorResult(error.message, error.name)
   for (const key in error) {
-    if (error.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(error, key)) {
       error_result[key] = error[key]
     }
   }
@@ -31,6 +22,15 @@ ErrorResult.fromError = function(error) {
 }
 ErrorResult.prototype.toString = function() {
   return this.name + ': ' + this.message
+}
+
+function _serialize(object) {
+  try {
+    return JSON.stringify(object)
+  }
+  catch (error) {
+    return JSON.stringify(ErrorResult.fromError(error))
+  }
 }
 
 // Request

@@ -50,7 +50,7 @@ tap.test('basic server', (t) => {
 
   const hostname = '127.0.0.1'
   // port = 0 finds random free port
-  var server = http.createServer(handler).listen(0, hostname, () => {
+  const server = http.createServer(handler).listen(0, hostname, () => {
     // server running, ready to run tests
     const port = server.address().port
     const addrport = 'http://' + hostname + ':' + port
