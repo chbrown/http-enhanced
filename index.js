@@ -68,7 +68,7 @@ http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
   else {
     // initialize
     this._readToEnd_state = 'reading'
-    this._readToEnd_buffer = new Buffer(0)
+    this._readToEnd_buffer = Buffer.alloc(0)
 
     // start listening for 'readable' events.
     this.on('readable', () => {
@@ -77,7 +77,7 @@ http.IncomingMessage.prototype.readToEnd = function(encoding, callback) {
         if (!Buffer.isBuffer(chunk)) {
           // the user should really not be using req.setEncoding('whatever'),
           //   but we don't want to crash if they do
-          chunk = new Buffer(chunk)
+          chunk = Buffer.from(chunk)
         }
         self._readToEnd_buffer = Buffer.concat([self._readToEnd_buffer, chunk])
       }
